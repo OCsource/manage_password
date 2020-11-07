@@ -201,7 +201,8 @@ class manageThePass:
         a = self.loadFile(path)
         if a == -1:
             return a
-        pathW = path.replace('.', '_en.')
+        # [::-1]是将字符创翻转，以下语句用于修改最后一位'.'为_en.
+        pathW = path[::-1].replace('.', '.ne_', 1)[::-1]
         b = self.encryptFile(pathW)
         if b == -1:
             return b
