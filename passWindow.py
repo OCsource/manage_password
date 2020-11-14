@@ -12,11 +12,24 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QStringListModel
 from PyQt5.QtGui import QIntValidator
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QAbstractItemView
-import solution,randomStr
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QAbstractItemView, QInputDialog, QLineEdit
+import solution,randomStr,loginPass
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
+
+        # 窗口login
+        icon_windows = QtGui.QIcon()
+        icon_windows.addPixmap(QtGui.QPixmap("img/closeWall.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+
+        # 统一弹窗对象,设置图标好像不起作用，后面再来看看
+        self.messageBox = QMessageBox()
+        self.messageBox.setWindowIcon(icon_windows)
+        # self.messageBox.
+        # self.messageBox.setIconPixmap(icon_windows)
+
+        # 设置登录密码，就不多弄一个界面了，直接弹窗输入密码确认
+        self.loginFun()
 
         self.so = solution.manageThePass()
         self.rds = randomStr.createRandomStr()
@@ -203,13 +216,14 @@ class Ui_MainWindow(object):
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
+        MainWindow.setWindowIcon(icon_windows)
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "密码管理"))
         self.label.setText(_translate("MainWindow", "密码提取"))
         self.label_2.setText(_translate("MainWindow", "名称："))
         self.pushButton.setText(_translate("MainWindow", "搜索"))
@@ -234,14 +248,15 @@ class Ui_MainWindow(object):
     def searchFun(self):
         text = self.lineEdit.text()
         if text.strip() == '' or text == None:
-            QMessageBox.about(QMainWindow(), "警告", "输入内容不能为空")
+            self.clearFun()
+            # self.messageBox.about(QMainWindow(), "警告", "输入内容不能为空")
             return - 1
         text = text.strip()
         if(text == 'all'):
             text = ''
         self.dict = self.so.decryptByLine(self.path,text)
         if self.dict == -1:
-            QMessageBox.about(QMainWindow(), "警告", "检索文件必须为密文，请检查你的路径文件！")
+            self.messageBox.about(QMainWindow(), "警告", "检索文件必须为密文，请检查你的路径文件！")
             return -1
         items = [key for key in self.dict]
         listModel = QStringListModel()
@@ -253,10 +268,10 @@ class Ui_MainWindow(object):
         text_2 = self.lineEdit_2.text()
         text_3 = self.lineEdit_3.text()
         if text_2.strip() == '' or text_2.strip() == None or text_3.strip() == '' or text_3.strip() == None:
-            QMessageBox.about(QMainWindow(), "警告", "输入内容不能为空！")
+            self.messageBox.about(QMainWindow(), "警告", "输入内容不能为空！")
             return -1
-        rec_code = QMessageBox.warning(QMainWindow(),"警告框","修改名称为：'" + text_2 + "'的密码为：'" + text_3 + "'",QMessageBox.Yes | QMessageBox.No)
-        if rec_code == QMessageBox.Yes:
+        rec_code = self.messageBox.warning(QMainWindow(),"警告框","修改名称为：'" + text_2 + "'的密码为：'" + text_3 + "'",self.messageBox.Yes | self.messageBox.No)
+        if rec_code == self.messageBox.Yes:
             result = self.so.loadAndTransAndUpdate(2, text_3, text_2, self.path)
             if result == 1:
                 # 判断搜索框中是否有内容，如果有调用搜索方法
@@ -266,16 +281,16 @@ class Ui_MainWindow(object):
                 else:
                     self.searchFun()
             else:
-                QMessageBox.about(QMainWindow(), "警告", "更新失败！")
+                self.messageBox.about(QMainWindow(), "警告", "更新失败！")
 
     def deleteFun(self):
         text_2 = self.lineEdit_2.text()
         text_3 = self.lineEdit_3.text()
         if text_2.strip() == '' or text_2.strip() == None or text_3.strip() == '' or text_3.strip() == None:
-            QMessageBox.about(QMainWindow(), "警告", "输入内容不能为空！")
+            self.messageBox.about(QMainWindow(), "警告", "输入内容不能为空！")
             return -1
-        rec_code = QMessageBox.warning(QMainWindow(), "警告框", "删除名称为：'" + text_2 + "'",QMessageBox.Yes | QMessageBox.No)
-        if rec_code == QMessageBox.Yes:
+        rec_code = self.messageBox.warning(QMainWindow(), "警告框", "删除名称为：'" + text_2 + "'",self.messageBox.Yes | self.messageBox.No)
+        if rec_code == self.messageBox.Yes:
             result = self.so.loadAndTransAndUpdate(-1, text_3, text_2, self.path)
             if result == 1:
                 # 判断搜索框中是否有内容，如果有调用搜索方法
@@ -285,16 +300,16 @@ class Ui_MainWindow(object):
                 else:
                     self.searchFun()
             else:
-                QMessageBox.about(QMainWindow(), "警告", "删除失败！")
+                self.messageBox.about(QMainWindow(), "警告", "删除失败！")
 
     def insertFun(self):
         text_4 = self.lineEdit_4.text()
         text_5 = self.lineEdit_5.text()
         if text_4.strip() == '' or text_4.strip() == None or text_5.strip() == '' or text_5.strip() == None:
-            QMessageBox.about(QMainWindow(), "警告", "输入内容不能为空！")
+            self.messageBox.about(QMainWindow(), "警告", "输入内容不能为空！")
             return -1
-        rec_code = QMessageBox.information(QMainWindow(), "提示框", "增加名称为：'" + text_4 + "'，密码为：'" + text_5 + "'", QMessageBox.Yes | QMessageBox.No)
-        if rec_code == QMessageBox.Yes:
+        rec_code = self.messageBox.information(QMainWindow(), "提示框", "增加名称为：'" + text_4 + "'，密码为：'" + text_5 + "'", self.messageBox.Yes | self.messageBox.No)
+        if rec_code == self.messageBox.Yes:
             result = self.so.loadAndTransAndUpdate(1, text_5, text_4, self.path)
             if result == 1:
                 # 判断搜索框中是否有内容，如果有调用搜索方法
@@ -304,9 +319,9 @@ class Ui_MainWindow(object):
                 else:
                     self.searchFun()
             elif result == -2:
-                QMessageBox.about(QMainWindow(), "警告", "已存在该名称！")
+                self.messageBox.about(QMainWindow(), "警告", "已存在该名称！")
             else:
-                QMessageBox.about(QMainWindow(), "警告", "添加失败！")
+                self.messageBox.about(QMainWindow(), "警告", "添加失败！")
 
     def listFun(self, index):
         name = index.data()
@@ -323,14 +338,14 @@ class Ui_MainWindow(object):
     def getRandomFun(self):
         num = self.lineEdit_6.text()
         if num.isdigit() == False:
-            QMessageBox.about(QMainWindow(), "警告", "输入内容需为数字！")
+            self.messageBox.about(QMainWindow(), "警告", "输入内容需为数字！")
             return -1
         choice_1 = 1 if self.check_1.isChecked() else 0
         choice_2 = 1 if self.check_2.isChecked() else 0
         choice_3 = 1 if self.check_3.isChecked() else 0
         s = self.rds.getRandomStr(int(num),choice_1,choice_2,choice_3)
         if s == -1:
-            QMessageBox.about(QMainWindow(), "警告", "输入内容有误，生成失败！")
+            self.messageBox.about(QMainWindow(), "警告", "输入内容有误，生成失败！")
         else:
             self.lineEdit_7.setText(s)
 
@@ -338,6 +353,20 @@ class Ui_MainWindow(object):
         fileName, fileType = QtWidgets.QFileDialog.getOpenFileName(QMainWindow(), "选择文件", os.getcwd(),"All Files(*);;Text Files(*.txt)")
         self.lineEdit_8.setText(fileName)
         self.path = fileName
+        # 清空
+        self.clearFun()
+
+    def transformFun(self):
+        textPath = self.lineEdit_8.text()
+        pathEn = self.so.loadFileAndencrypt(textPath)
+        if pathEn == -1:
+            self.messageBox.about(QMainWindow(), "警告", "文本转化失败！")
+        else:
+            self.path = pathEn
+            self.lineEdit_8.setText(pathEn)
+
+    # 清空文本框
+    def clearFun(self):
         # 清空列表
         items = []
         listModel = QStringListModel()
@@ -350,14 +379,17 @@ class Ui_MainWindow(object):
         self.lineEdit_4.clear()
         self.lineEdit_5.clear()
 
-    def transformFun(self):
-        textPath = self.lineEdit_8.text()
-        pathEn = self.so.loadFileAndencrypt(textPath)
-        if pathEn == -1:
-            QMessageBox.about(QMainWindow(), "警告", "文本转化失败！")
+    # 登录弹窗
+    def loginFun(self):
+        LOGIN, ok = QInputDialog.getText(MainWindow, '登录', '请输入密码：', QLineEdit.Password)
+        if ok:
+            if str(LOGIN) == str(loginPass.LOGINPASS):
+                self.messageBox.about(QMainWindow(), "提示", "欢迎使用密码管理程序")
+            else:
+                self.messageBox.about(QMainWindow(), "提示", "密码错误请重新尝试")
+                self.loginFun()
         else:
-            self.path = pathEn
-            self.lineEdit_8.setText(pathEn)
+            sys.exit(484666)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

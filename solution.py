@@ -87,7 +87,7 @@ class manageThePass:
     # 参数：类型（1按照密码增加网点名称，-1按照密码删除网点名称，2按照网点名称修改密码），密码，网点名称（有括号的也要讲括号内容写入）,跟新文件路径
     # 返回：成功：1，修改密文文件内容，失败：-1
     def changeWebsite(self, type, password, name, path):
-        print('type:', type, 'content',self.content)
+        # print('type:', type, 'content',self.content)
         try:
             # 按照密码增加网点名称
             # 需要的参数有：type,password,name
