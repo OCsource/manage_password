@@ -13,7 +13,7 @@ import re
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QStringListModel
 from PyQt5.QtGui import QIntValidator
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QAbstractItemView, QInputDialog, QLineEdit
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QAbstractItemView, QInputDialog, QLineEdit, QAction
 import solution,randomStr,loginPass
 
 class Ui_MainWindow(object):
@@ -42,7 +42,7 @@ class Ui_MainWindow(object):
         self.totalFileList = []
         for f in self.fileList:
             self.totalFileList.append(frontPath + '/' + f)
-        print(self.totalFileList)
+        # print(self.totalFileList)
         self.path = self.totalFileList[0] if len(self.totalFileList) > 0 else ''
         # self.path = '' if len(fileList) < 1 else frontPath + '/' + fileList[0]
         # print(self.path)
@@ -58,8 +58,31 @@ class Ui_MainWindow(object):
 
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
+
+        # 菜单栏
+        self.menubar = QtWidgets.QMenuBar(MainWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 369, 24))
+        self.menubar.setObjectName("menubar")
+        self.menuFile = QtWidgets.QMenu(self.menubar)
+        self.menuFile.setObjectName("menuFile")
+        MainWindow.setMenuBar(self.menubar)
+        self.statusBar = QtWidgets.QStatusBar(MainWindow)
+        self.statusBar.setObjectName("statusBar")
+        MainWindow.setStatusBar(self.statusBar)
+        self.actionnewFile = QtWidgets.QAction(MainWindow)
+        self.actionnewFile.setIcon(QtGui.QIcon('img/down.png'))
+        self.actionnewFile.setObjectName("actionnewFile")
+        self.actionnewFile.triggered.connect(self.loadFileFun)
+        self.actionnewFile_2 = QtWidgets.QAction(MainWindow)
+        self.actionnewFile_2.setIcon(QtGui.QIcon('img/document.png'))
+        self.actionnewFile_2.setObjectName("actionnewFile_2")
+        self.actionnewFile_2.triggered.connect(self.newEmptyFileFun)
+        self.menuFile.addAction(self.actionnewFile)
+        self.menuFile.addAction(self.actionnewFile_2)
+        self.menubar.addAction(self.menuFile.menuAction())
+
         self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setGeometry(QtCore.QRect(140, 8, 91, 41))
+        self.label.setGeometry(QtCore.QRect(140, 6, 91, 41))
 
         font = QtGui.QFont()
         font.setFamily("Adobe 宋体 Std L")
@@ -80,15 +103,15 @@ class Ui_MainWindow(object):
         font_12.setFamily("Adobe 宋体 Std L")
         font_12.setPointSize(12)
 
-        self.pushButton_9 = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton_9.setGeometry(QtCore.QRect(20, 20, 61, 21))
-        self.pushButton_9.setFont(font_10)
-        self.pushButton_9.setObjectName("pushButton_10")
-        self.pushButton_9.clicked.connect(self.newEmptyFileFun)
+        # self.pushButton_9 = QtWidgets.QPushButton(self.centralwidget)
+        # self.pushButton_9.setGeometry(QtCore.QRect(20, 20, 61, 21))
+        # self.pushButton_9.setFont(font_10)
+        # self.pushButton_9.setObjectName("pushButton_10")
+        # self.pushButton_9.clicked.connect(self.newEmptyFileFun)
 
         self.comboBox = QtWidgets.QComboBox(self.centralwidget)
         self.comboBox.setFont(font_12)
-        self.comboBox.setGeometry(QtCore.QRect(70, 55, 151, 21))
+        self.comboBox.setGeometry(QtCore.QRect(70, 55, 191, 21))
         self.comboBox.addItems(self.fileList)
         self.comboBox.setObjectName("comboBox")
         self.comboBox.currentIndexChanged[int].connect(self.sullDownFun)
@@ -104,13 +127,18 @@ class Ui_MainWindow(object):
         self.label_9.setGeometry(QtCore.QRect(20, 55, 41, 21))
         self.label_9.setFont(font_12)
         self.label_9.setObjectName("label_9")
-        self.pushButton_7 = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton_7.setGeometry(QtCore.QRect(230, 55, 51, 21))
-        self.pushButton_7.setFont(font_10)
-        self.pushButton_7.clicked.connect(self.loadFileFun)
+        # self.pushButton_7 = QtWidgets.QPushButton(self.centralwidget)
+        # self.pushButton_7.setGeometry(QtCore.QRect(230, 55, 51, 21))
+        # self.pushButton_7.setFont(font_10)
+        # self.pushButton_7.setObjectName("pushButton_7")
+        # self.pushButton_7.clicked.connect(self.loadFileFun)
         self.pushButton_8 = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton_8.setGeometry(QtCore.QRect(290, 55, 51, 21))
+        self.pushButton_8.setGeometry(QtCore.QRect(280, 55, 61, 21))
         self.pushButton_8.setFont(font_10)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("img/repeat.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.pushButton_8.setIcon(icon)
+        self.pushButton_8.setObjectName("pushButton_8")
         self.pushButton_8.clicked.connect(self.transformFun)
 
         self.lineEdit = QtWidgets.QLineEdit(self.centralwidget)
@@ -225,13 +253,6 @@ class Ui_MainWindow(object):
         self.pushButton_6.clicked.connect(self.getRandomFun)
 
         MainWindow.setCentralWidget(self.centralwidget)
-        self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 369, 18))
-        self.menubar.setObjectName("menubar")
-        MainWindow.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(MainWindow)
-        self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
         MainWindow.setWindowIcon(icon_windows)
 
         self.retranslateUi(MainWindow)
@@ -257,9 +278,12 @@ class Ui_MainWindow(object):
         self.label_8.setText(_translate("MainWindow", "随机数："))
         self.pushButton_6.setText(_translate("MainWindow", "生成"))
         self.label_9.setText(_translate("MainWindow", "路径："))
-        self.pushButton_7.setText(_translate("MainWindow", "导入"))
+        # self.pushButton_7.setText(_translate("MainWindow", "导入"))
         self.pushButton_8.setText(_translate("MainWindow", "转化"))
-        self.pushButton_9.setText(_translate("MainWindow", "新增文本"))
+        # self.pushButton_9.setText(_translate("MainWindow", "新增文本"))
+        self.menuFile.setTitle(_translate("MainWindow", "文本操作"))
+        self.actionnewFile.setText(_translate("MainWindow", "导入文件"))
+        self.actionnewFile_2.setText(_translate("MainWindow", "新建文件"))
 
     # 方法区
     def searchFun(self):
@@ -373,6 +397,12 @@ class Ui_MainWindow(object):
         fileName, fileType = QtWidgets.QFileDialog.getOpenFileName(QMainWindow(), "选择文件", os.getcwd(),"All Files(*);;Text Files(*.txt)")
         # self.lineEdit_8.setText(fileName)
         tailFileName = fileName.split('/')[-1]
+        if tailFileName in self.fileList:
+            tailFileName = self.sameNameAddI(tailFileName)
+            if tailFileName == -1:
+                self.messageBox.about(QMainWindow(), "警告", "相同文本名文件导入过多命名，导入失败！")
+                return -1
+        self.fileList.append(tailFileName)
         self.comboBox.addItem(tailFileName)
         self.totalFileList.append(fileName)
         self.comboBox.setCurrentIndex(len(self.totalFileList) - 1)
@@ -392,6 +422,12 @@ class Ui_MainWindow(object):
         else:
             self.totalFileList.append(pathEn)
             tailFileName = pathEn.split('/')[-1]
+            if tailFileName in self.fileList:
+                tailFileName = self.sameNameAddI(tailFileName)
+                if tailFileName == -1:
+                    self.messageBox.about(QMainWindow(), "警告", "文本转化命名失败！")
+                    return -1
+            self.fileList.append(tailFileName)
             self.comboBox.addItem(tailFileName)
             self.comboBox.setCurrentIndex(len(self.totalFileList) - 1)
             self.path = pathEn
@@ -437,10 +473,18 @@ class Ui_MainWindow(object):
                 try:
                     tailFileName = FILENAME.strip() + '.txt'
                     fileName = './passfile/' + tailFileName
+                    if os.path.exists(fileName):
+                        rec_code = self.messageBox.warning(QMainWindow(), "警告框", "覆盖文件：'" + tailFileName + "'",
+                                                           self.messageBox.Yes | self.messageBox.No)
+                        if rec_code == self.messageBox.No:
+                            return -1
+                        self.comboBox.setCurrentIndex(self.fileList.index(tailFileName))
+                    else:
+                        self.totalFileList.append(tailFileName)
+                        self.comboBox.addItem(tailFileName)
+                        self.fileList.append(tailFileName)
+                        self.comboBox.setCurrentIndex(len(self.totalFileList) - 1)
                     f = open(fileName, 'w')
-                    self.totalFileList.append(tailFileName)
-                    self.comboBox.addItem(tailFileName)
-                    self.comboBox.setCurrentIndex(len(self.totalFileList) - 1)
                     self.path = fileName
                     self.messageBox.about(QMainWindow(), "提示", "文本创建成功")
                 except Exception as e:
@@ -455,20 +499,17 @@ class Ui_MainWindow(object):
     # 命名重复循环添加i
     def sameNameAddI(self, name):
         flag = 0
-        while flag < 10:
+        while flag < 5:
             if name in self.fileList:
-                if '(' in name:
-                    pattern = re.compile(r'\(\d+\)')
-                    nums = pattern.findall(name)
-                    if nums > 0:
-                        numAndBracket =nums[-1]
-                        print(numAndBracket)
-                        # 去掉前后括号
-                        num = int(numAndBracket[1:-1])
-                        name = name.replace(numAndBracket, "(" + str(num+1) + ")")
+                pattern = re.compile(r'\((\d+)\)')
+                nums = pattern.findall(name)
+                # print("nums:", nums)
+                if len(nums) > 0:
+                    num = int(nums[-1])
+                    # print("num:", num)
+                    name = name.replace("(" + str(num) + ")", "(" + str(num + 1) + ")")
                 else:
-                    # 反转替换再反转
-                    name = name[::-1].replace('.', '.(1)', 1)[::-1]
+                    name = name[::-1].replace('.', '.)1(', 1)[::-1]
             else:
                 return name
             flag += 1
