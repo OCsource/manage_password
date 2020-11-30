@@ -209,6 +209,85 @@ class manageThePass:
         else:
             return pathW
 
+    # 密码加密
+    # 参数：data 加密数据，num1,num2两个秘钥参数
+    # 返回：成功 加密后的密码 失败 -1
+    def encryptPassword(self, data, num1, num2):
+        newData = ''
+        try:
+            for c in data:
+                asciiC = ord(c)
+                if ((asciiC <= 122 and asciiC >= 97) or (asciiC <= 90 and asciiC >= 65)):
+                    c = self.handleAlphabet(c,1,num1,num2)
+                elif (asciiC <= 57 and asciiC >= 48):
+                    c = self.handleNumber(c,1,num1,num2)
+                else:
+                    c = self.handleSymbol(c,1,num1,num2)
+                newData += c
+        except Exception as e:
+            print(e)
+            return -1
+        return newData
+
+    # 密码解密
+    # 参数：data 解密数据，num1,num2两个秘钥参数
+    # 返回：成功 解密后的密码 失败 -1
+    def decryptPassword(self, data, num1, num2):
+        pass
+
+    # 英文部分
+    # 参数：type 1加密，0解密，data 数据，num1,num2秘钥参数
+    # 返回：成功 加密解密后的数据 失败 -1
+    def handleAlphabet(self, type, data, num1, num2):
+        asciiData = ord(data)
+        if asciiData >= 97 and asciiData <= 122:
+            if type == 1:
+                asciiData = ((asciiData - 97) + (num1 % 26)) % 26 + 65
+            if type == 0:
+                print('解密还没写')
+                pass
+        elif asciiData >= 65 and asciiData <= 90:
+            if type == 1:
+                asciiData = ((asciiData - 65) - (num2 % 26)) % 26 + 97
+            if type == 0:
+                print('解密还没写')
+                pass
+        else:
+            print('该字符不是字母，错误！')
+            return -1
+        return chr(asciiData)
+    # 数字部分
+    # 参数：type 1加密，0解密，data 数据，num1,num2秘钥参数
+    # 返回：成功 加密解密后的数据 失败 -1
+    def handleNumber(self, type, data, num1, num2):
+        data = int(data)
+        if (type == 1):
+            num3 = min(num1%10, num2%10)
+            num4 = max(num1 % 10, num2 % 10)
+            if (num3 != 0 and data >= 0 and data < num3):
+                data = num3 - 1 - data + 0
+            if (num3 != num4 and data >= num3 and data <= num4):
+                data = ((num3 + num4 + data) % (num4 - num3 + 1)) + num3
+            if (num4 != 9 and data > num4 and data <= 9):
+                data = 9 - data + num4 + 1
+        else:
+            print('解密部分没有写')
+            pass
+        return data
+
+    # 符号部分
+    # 参数：type 1加密，0解密，data 数据，num1,num2秘钥参数
+    # 返回：成功 加密解密后的数据 失败 -1
+    def handleSymbol(self, type, data, num1, num2):
+        symbols = ['!', '@', '#', '$', '%', '^', '&', '*', '-', '+', '/', '<', '>', '~', '.', '|', '`']
+        data = str(data)
+        symbolIndex = symbols.index(data)
+        if type == 1:
+            symbolIndex = ((symbolIndex + num1) * num2 ) % len(symbols)
+        else:
+            print('解密部分没有写')
+            pass
+        return symbols[symbolIndex]
 
 # 主函数入口
 if __name__ == "__main__":

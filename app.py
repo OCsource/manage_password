@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QStringListModel
 from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QAbstractItemView, QInputDialog, QLineEdit, QAction
-import solution,randomStr,loginPass
+import secretUtils,randomStr,loginPass
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -32,7 +32,7 @@ class Ui_MainWindow(object):
         # 设置登录密码，就不多弄一个界面了，直接弹窗输入密码确认
         self.loginFun()
 
-        self.so = solution.manageThePass()
+        self.su = secretUtils.manageThePass()
         self.rds = randomStr.createRandomStr()
         # 路径先写在这里
         frontPath = './passfile'
@@ -295,7 +295,7 @@ class Ui_MainWindow(object):
         text = text.strip()
         if(text == 'all'):
             text = ''
-        self.dict = self.so.decryptByLine(self.path,text)
+        self.dict = self.su.decryptByLine(self.path,text)
         if self.dict == -1:
             self.messageBox.about(QMainWindow(), "警告", "检索文件必须为密文，请检查你的路径文件！")
             return -1
@@ -315,7 +315,7 @@ class Ui_MainWindow(object):
             return -1
         rec_code = self.messageBox.warning(QMainWindow(),"警告框","修改名称为：'" + text_2 + "'的密码为：'" + text_3 + "'",self.messageBox.Yes | self.messageBox.No)
         if rec_code == self.messageBox.Yes:
-            result = self.so.loadAndTransAndUpdate(2, text_3, text_2, self.path)
+            result = self.su.loadAndTransAndUpdate(2, text_3, text_2, self.path)
             if result == 1:
                 # 判断搜索框中是否有内容，如果有调用搜索方法
                 text = self.lineEdit.text()
@@ -334,7 +334,7 @@ class Ui_MainWindow(object):
             return -1
         rec_code = self.messageBox.warning(QMainWindow(), "警告框", "删除名称为：'" + text_2 + "'",self.messageBox.Yes | self.messageBox.No)
         if rec_code == self.messageBox.Yes:
-            result = self.so.loadAndTransAndUpdate(-1, text_3, text_2, self.path)
+            result = self.su.loadAndTransAndUpdate(-1, text_3, text_2, self.path)
             if result == 1:
                 # 判断搜索框中是否有内容，如果有调用搜索方法
                 text = self.lineEdit.text()
@@ -353,7 +353,7 @@ class Ui_MainWindow(object):
             return -1
         rec_code = self.messageBox.information(QMainWindow(), "提示框", "增加名称为：'" + text_4 + "'，密码为：'" + text_5 + "'", self.messageBox.Yes | self.messageBox.No)
         if rec_code == self.messageBox.Yes:
-            result = self.so.loadAndTransAndUpdate(1, text_5, text_4, self.path)
+            result = self.su.loadAndTransAndUpdate(1, text_5, text_4, self.path)
             if result == 1:
                 # 判断搜索框中是否有内容，如果有调用搜索方法
                 text = self.lineEdit.text()
@@ -416,7 +416,7 @@ class Ui_MainWindow(object):
         # textPath = self.lineEdit_8.text()
         textIndex = self.comboBox.currentIndex()
         textPath = self.totalFileList[textIndex]
-        pathEn = self.so.loadFileAndencrypt(textPath)
+        pathEn = self.su.loadFileAndencrypt(textPath)
         if pathEn == -1:
             self.messageBox.about(QMainWindow(), "警告", "文本转化失败！")
         else:
