@@ -1,1 +1,1 @@
-LOGINPASS = 123456
+LOGINPASS = 'nicaia'
