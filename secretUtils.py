@@ -1,5 +1,6 @@
 # 目前加密使用的比较简单后续可以使用强一点的
 import binascii
+import addSecretToPassword
 
 # 输入查找的信息输出账号密码
 # 路径加密，源文件密码加密
@@ -7,7 +8,14 @@ import binascii
 # 用户密码案例: 123456: mysql(root),rabbitmq(admin) “: ”前面的为密码，后面为网点名称，括号里面的是用户名
 # 下面的方法有交叉的地方请看清楚功能再使用
 class manageThePass:
-    content = {}
+    # 全局变量
+    # 账号密码字典
+    CONTENT = {}
+    # 加密类
+    TE = addSecretToPassword.threeEncryption()
+    # 加密参数
+    NUM1 = 6
+    NUM2 = 16
 
     # 解密
     # 参数：密文
@@ -43,7 +51,7 @@ class manageThePass:
         if len(lineSplit) < 2:
             return ''
         password = lineSplit[0]
-        self.content[password] = []
+        self.CONTENT[password] = []
         names = lineSplit[1].split(',')
         nameLen = len(names)
         for name in names:
@@ -51,17 +59,17 @@ class manageThePass:
             if '\n' in name:
                 # print(name)
                 name = name[:-1]
-            self.content[password].append(name)
+            self.CONTENT[password].append(name)
         # if nameLen > 0:
         #     # 将每一列的末尾的“\n”去掉
-        #     self.content[password][nameLen - 1] = self.content[password][nameLen - 1][:-1]
+        #     self.CONTENT[password][nameLen - 1] = self.CONTENT[password][nameLen - 1][:-1]
 
     # 找到相应的行数，用于明文查找
     # 参数：搜索的内容
     # 返回：明文密码
     def findLine(self, name):
-        for one in self.content:
-            if name in self.content[one]:
+        for one in self.CONTENT:
+            if name in self.CONTENT[one]:
                 return self.decryption(one)
 
     # 根据一篇明文生成一篇密文（列项加密）
@@ -70,9 +78,10 @@ class manageThePass:
     def encryptFile(self, pathW):
         try:
             fw = open(pathW, 'w', encoding='utf-8')
-            for password in self.content:
-                line = password + ": "
-                for name in self.content[password]:
+            for password in self.CONTENT:
+                en_password = self.TE.encryptPassword(password, self.NUM1, self.NUM2)
+                line = en_password + ": "
+                for name in self.CONTENT[password]:
                     line += (name + ',')
                 line = line[:-1]
                 fw.write(str(self.encryption(line), encoding='utf-8') + '\n')
@@ -87,42 +96,42 @@ class manageThePass:
     # 参数：类型（1按照密码增加网点名称，-1按照密码删除网点名称，2按照网点名称修改密码），密码，网点名称（有括号的也要讲括号内容写入）,跟新文件路径
     # 返回：成功：1，修改密文文件内容，失败：-1
     def changeWebsite(self, type, password, name, path):
-        # print('type:', type, 'content',self.content)
+        # print('type:', type, 'CONTENT',self.CONTENT)
         try:
             # 按照密码增加网点名称
             # 需要的参数有：type,password,name
             if type == 1:
                 # 判断是否已存在该名称如果是，返回-2，否，继续
-                for key in self.content:
+                for key in self.CONTENT:
                     # print('c',c,'name',name)
-                    if name in self.content[key]:
+                    if name in self.CONTENT[key]:
                         return -2
-                if password in self.content:
-                    self.content[password].append(name)
+                if password in self.CONTENT:
+                    self.CONTENT[password].append(name)
                 else:
-                    self.content[password] = [name]
+                    self.CONTENT[password] = [name]
             # 按照网点名称修改密码，先进行原账号绑定的网点名称删除，再进行新密码与网点名称绑定
             # 需要的参数有：type,password,name
             elif type == 2:
-                for key in self.content:
-                    if name in self.content[key]:
-                        self.content[key].remove(name)
-                        if len(self.content[key]) < 1:
-                            self.content.pop(key)
+                for key in self.CONTENT:
+                    if name in self.CONTENT[key]:
+                        self.CONTENT[key].remove(name)
+                        if len(self.CONTENT[key]) < 1:
+                            self.CONTENT.pop(key)
                         break
-                if password in self.content:
-                    self.content[password].append(name)
+                if password in self.CONTENT:
+                    self.CONTENT[password].append(name)
                 else:
-                    self.content[password] = [name]
+                    self.CONTENT[password] = [name]
             # 按照密码删除网点名称
             # 需要的参数有：type,password,name
             elif type == -1:
-                # print('pass:', password, 'name',name, 'content:', self.content)
-                if password in self.content:
-                    self.content[password].remove(name)
+                # print('pass:', password, 'name',name, 'CONTENT:', self.CONTENT)
+                if password in self.CONTENT:
+                    self.CONTENT[password].remove(name)
                     # 如果列表为空，删除该键
-                    if len(self.content[password]) < 1:
-                        self.content.pop(password)
+                    if len(self.CONTENT[password]) < 1:
+                        self.CONTENT.pop(password)
             else:
                 print('no suitable type')
                 return -1
@@ -136,15 +145,19 @@ class manageThePass:
 
     # 读取并解密密文内容到字典中
     # 参数：密文文件路径
-    # 返回：成功：1，载入content字典内容，失败：-1
+    # 返回：成功：1，载入CONTENT字典内容，失败：-1
     def loadAndDecryption(self, path):
-        self.content = {}
+        self.CONTENT = {}
         try:
             with open(path, 'r') as f:
                 lines = f.readlines()
                 for line in lines:
                     line = bytes(line[:-1], encoding="utf8")
                     line = self.decryption(line)
+                    # 读取密文时要先将password转换一下
+                    line_split = line.split(": ")
+                    if len(line_split) > 1:
+                        line = self.TE.decryptPassword(line_split[0], self.NUM1, self.NUM2) + ": " +line_split[1]
                     self.splitLineToDic(line)
             print('file load success')
             return 1
@@ -168,7 +181,10 @@ class manageThePass:
                     if name in decrypted:
                         decrypts = decrypted.split(":")
                         if len(decrypts) > 1:
-                            password = decrypts[0]
+                            # password = decrypts[0]
+                            password = self.TE.decryptPassword(decrypts[0],self.NUM1, self.NUM2)
+                            if password == -1:
+                                return -1
                             names = decrypts[1].split(",")
                             for n in names:
                                 if name in n:
@@ -182,9 +198,9 @@ class manageThePass:
             print(e)
             return -1
 
-    # 测试content，输出全局变量
+    # 测试CONTENT，输出全局变量
     def printContent(self):
-        print(self.content)
+        print(self.CONTENT)
 
     # 载入密文文件转化之后再修改
     def loadAndTransAndUpdate(self,type, password, name, path):
@@ -198,6 +214,8 @@ class manageThePass:
     # 参数：明文路径
     # 返回：成功 密文路径，失败 -1
     def loadFileAndencrypt(self, path):
+        # 每次转换文本前先清空之前的字典
+        self.CONTENT = {}
         a = self.loadFile(path)
         if a == -1:
             return a
@@ -208,86 +226,6 @@ class manageThePass:
             return b
         else:
             return pathW
-
-    # 密码加密
-    # 参数：data 加密数据，num1,num2两个秘钥参数
-    # 返回：成功 加密后的密码 失败 -1
-    def encryptPassword(self, data, num1, num2):
-        newData = ''
-        try:
-            for c in data:
-                asciiC = ord(c)
-                if ((asciiC <= 122 and asciiC >= 97) or (asciiC <= 90 and asciiC >= 65)):
-                    c = self.handleAlphabet(c,1,num1,num2)
-                elif (asciiC <= 57 and asciiC >= 48):
-                    c = self.handleNumber(c,1,num1,num2)
-                else:
-                    c = self.handleSymbol(c,1,num1,num2)
-                newData += c
-        except Exception as e:
-            print(e)
-            return -1
-        return newData
-
-    # 密码解密
-    # 参数：data 解密数据，num1,num2两个秘钥参数
-    # 返回：成功 解密后的密码 失败 -1
-    def decryptPassword(self, data, num1, num2):
-        pass
-
-    # 英文部分
-    # 参数：type 1加密，0解密，data 数据，num1,num2秘钥参数
-    # 返回：成功 加密解密后的数据 失败 -1
-    def handleAlphabet(self, type, data, num1, num2):
-        asciiData = ord(data)
-        if asciiData >= 97 and asciiData <= 122:
-            if type == 1:
-                asciiData = ((asciiData - 97) + (num1 % 26)) % 26 + 65
-            if type == 0:
-                print('解密还没写')
-                pass
-        elif asciiData >= 65 and asciiData <= 90:
-            if type == 1:
-                asciiData = ((asciiData - 65) - (num2 % 26)) % 26 + 97
-            if type == 0:
-                print('解密还没写')
-                pass
-        else:
-            print('该字符不是字母，错误！')
-            return -1
-        return chr(asciiData)
-    # 数字部分
-    # 参数：type 1加密，0解密，data 数据，num1,num2秘钥参数
-    # 返回：成功 加密解密后的数据 失败 -1
-    def handleNumber(self, type, data, num1, num2):
-        data = int(data)
-        if (type == 1):
-            num3 = min(num1%10, num2%10)
-            num4 = max(num1 % 10, num2 % 10)
-            if (num3 != 0 and data >= 0 and data < num3):
-                data = num3 - 1 - data + 0
-            if (num3 != num4 and data >= num3 and data <= num4):
-                data = ((num3 + num4 + data) % (num4 - num3 + 1)) + num3
-            if (num4 != 9 and data > num4 and data <= 9):
-                data = 9 - data + num4 + 1
-        else:
-            print('解密部分没有写')
-            pass
-        return data
-
-    # 符号部分
-    # 参数：type 1加密，0解密，data 数据，num1,num2秘钥参数
-    # 返回：成功 加密解密后的数据 失败 -1
-    def handleSymbol(self, type, data, num1, num2):
-        symbols = ['!', '@', '#', '$', '%', '^', '&', '*', '-', '+', '/', '<', '>', '~', '.', '|', '`']
-        data = str(data)
-        symbolIndex = symbols.index(data)
-        if type == 1:
-            symbolIndex = ((symbolIndex + num1) * num2 ) % len(symbols)
-        else:
-            print('解密部分没有写')
-            pass
-        return symbols[symbolIndex]
 
 # 主函数入口
 if __name__ == "__main__":
@@ -300,9 +238,16 @@ if __name__ == "__main__":
     # mtp.encryptFile(path2)
     # mtp.printContent()
 
+    # TE = addSecretToPassword.threeEncryption()
+    #
+    # pw = '54`4572#.2@.>6*.<5#9'
+    # en = TE.encryptPassword(pw, 5, 20)
+    # de = TE.decryptPassword(en, 5, 20)
+    # print(pw , ' 加密后密码为 ' , en)
+    # print(en , ' 解密后密码为 ' , de)
     # 测试在密文中查找密码
-    dict = mtp.decryptByLine(path2, 's')
-    print(dict)
+    # dict = mtp.decryptByLine(path2, 's')
+    # print(dict)
     # mtp.printContent()
 
     # 测试修改密文文件
