@@ -431,6 +431,7 @@ class Ui_MainWindow(object):
             self.comboBox.addItem(tailFileName)
             self.comboBox.setCurrentIndex(len(self.totalFileList) - 1)
             self.path = pathEn
+            self.messageBox.about(QMainWindow(), "提示", "文本转化成功，文件名为：" + str(tailFileName))
             # self.lineEdit_8.setText(pathEn)
 
     # 清空文本框

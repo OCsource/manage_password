@@ -102,7 +102,7 @@ class threeEncryption:
     # 参数：options 1加密，0解密，data 数据，num1,num2秘钥参数
     # 返回：成功 加密解密后的数据 失败 -1
     def handleSymbol(self, options, data, num1, num2):
-        symbols = ['!', '@', '#', '$', '%', '^', '&', '*', '-', '+', '/', '<', '>', '~', '.', '|', '`']
+        symbols = ['!', '@', '#', '$', '%', '^', '&', '*', '-', '+', '/', '<', '>', '~', '.', '|', '`', '=', '?']
         data = str(data)
         symbolIndex = symbols.index(data)
         if options == 1:
